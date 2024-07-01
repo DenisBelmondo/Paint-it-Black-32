@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <windows.h>
 
-__declspec(dllexport) WINAPI
 LRESULT HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
     CWPRETSTRUCT *args = (CWPRETSTRUCT *)lParam;
 

@@ -1,13 +1,15 @@
+#include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <windows.h>
 
 HHOOK _hook;
 
-int SetHook(void) {
+static int SetHook(void) {
     static HMODULE dll;
     static HOOKPROC hookProc;
 
-    dll = LoadLibrary("dark.dll");
+    dll = LoadLibrary("dark" BITS ".dll");
 
     if (!dll) {
         MessageBox(NULL, "Could not load dark.dll.", "Paint it Black 32", MB_ICONERROR);
@@ -29,16 +31,34 @@ int SetHook(void) {
     return 0;
 }
 
-void ReleaseHook(void) {
+static void ReleaseHook(void) {
     UnhookWindowsHookEx(_hook);
+}
+
+static void SignalHandler(int signal) {
+    if (signal == SIGTERM || signal == SIGABRT || signal == SIGABRT2) {
+        ReleaseHook();
+    }
 }
 
 int main(void) {
     MSG msg;
+    int i;
+
+    for (i = 0; i < NSIG; i++) {
+        signal(i, SignalHandler);
+    }
+
+    atexit(ReleaseHook);
 
     if (SetHook()) {
         return 1;
     }
 
-    while (GetMessage(&msg, NULL, 0, 0));
+    while (GetMessage(&msg, NULL, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    return 0;
 }

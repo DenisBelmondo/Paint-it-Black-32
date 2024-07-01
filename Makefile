@@ -3,7 +3,8 @@ CFLAGS +=\
 	-Wall\
 	-Wextra\
 	-Wpedantic
+BITS := $(shell uname -a | grep -Po '(?<=MINGW)\d+')
 
 all:
-	$(CC) -fPIC -shared $(CFLAGS) -o dark.dll -ldwmapi dark.c
-	$(CC) $(CFLAGS) -o dark $(LDFLAGS) main.c
+	$(CC) -fPIC -shared $(CFLAGS) -DBITS=\"$(BITS)\" -o dark$(BITS).dll -ldwmapi dark.c
+	$(CC) $(CFLAGS) -DBITS=\"$(BITS)\" -o dark$(BITS) $(LDFLAGS) main.c
